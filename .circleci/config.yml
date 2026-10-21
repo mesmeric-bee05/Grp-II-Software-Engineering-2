@@ -1,0 +1,27 @@
+version: 2.1
+jobs:
+  test:
+    docker:
+      - image: cimg/python:3.12
+    environment:
+      SECRET_KEY: ci-only-not-for-production
+      DEBUG: "1"
+      DATABASE_URL: ""
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-pip-{{ checksum "requirements.txt" }}
+      - run: pip install -r requirements.txt
+      - save_cache:
+          key: v1-pip-{{ checksum "requirements.txt" }}
+          paths:
+            - ~/.cache/pip
+      - run: python manage.py check --deploy
+      - run: python manage.py migrate --noinput
+      - run: pytest
+      - run: bandit -q -r config dashboard -x dashboard/migrations,dashboard/tests.py
+workflows:
+  test-and-secure:
+    jobs:
+      - test

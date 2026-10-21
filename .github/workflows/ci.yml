@@ -1,0 +1,25 @@
+name: Aroma Delight CI
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    env:
+      SECRET_KEY: ci-only-not-for-production
+      DEBUG: "1"
+      DATABASE_URL: ""
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: python manage.py check --deploy
+      - run: python manage.py migrate --noinput
+      - run: pytest
+      - run: bandit -q -r config dashboard -x dashboard/migrations,dashboard/tests.py
+      - run: pip-audit -r requirements.txt

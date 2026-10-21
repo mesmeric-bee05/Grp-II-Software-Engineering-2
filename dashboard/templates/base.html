@@ -1,0 +1,60 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Aroma Delight Coffee Shop operations dashboard">
+  <title>{% block title %}Dashboard{% endblock %} · Aroma Delight</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  {% block head %}{% endblock %}
+</head>
+<body class="{% if user.is_authenticated %}app-shell{% else %}auth-shell{% endif %}">
+{% if user.is_authenticated %}
+  <div class="app-layout">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="{% url 'dashboard' %}" aria-label="Aroma Delight dashboard home">
+        <span class="brand-mark"><img src="{% static 'img/aroma-mark.svg' %}" alt=""></span>
+        <span><strong>Aroma Delight</strong><small>Operations desk</small></span>
+      </a>
+      <div class="sidebar-section-label">Today’s desk</div>
+      <nav class="nav-list" aria-label="Main navigation">
+        <a class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}"><span class="nav-icon">⌂</span><span>Overview</span></a>
+        <a class="nav-item {% if 'order' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'order_list' %}"><span class="nav-icon">◷</span><span>Orders</span></a>
+        {% if user.is_management %}
+        <a class="nav-item {% if 'product' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'product_list' %}"><span class="nav-icon">✦</span><span>Menu & prices</span></a>
+        {% endif %}
+        <a class="nav-item {% if 'inventory' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'inventory' %}"><span class="nav-icon">▥</span><span>Inventory</span>{% if low_stock_count %}<span class="nav-badge">{{ low_stock_count }}</span>{% endif %}</a>
+        {% if user.role != 'BARISTA' %}<a class="nav-item {% if 'customer' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'customer_list' %}"><span class="nav-icon">◌</span><span>Customers</span></a>{% endif %}
+        {% if user.is_management %}<a class="nav-item {% if 'staff' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'staff_list' %}"><span class="nav-icon">♙</span><span>Staff & audit</span></a>{% endif %}
+      </nav>
+      <div class="sidebar-note"><span class="note-dot"></span><div><strong>Limuru, Kenya</strong><small>Counter open · {{ now|date:'g:i A' }}</small></div></div>
+      <div class="sidebar-footer"><span class="security-lock">⌁</span> Secure workspace</div>
+    </aside>
+    <main class="main-content">
+      <header class="topbar">
+        <button class="mobile-menu" type="button" aria-label="Open navigation" data-menu-toggle>☰</button>
+        <div class="breadcrumb">Aroma Delight <span>/</span> {% block breadcrumb %}Overview{% endblock %}</div>
+        <div class="topbar-actions">
+          <span class="topbar-date">{{ now|date:'l, j F Y' }}</span>
+          <div class="user-chip"><span class="avatar">{{ user.first_name|first|default:user.username|first|upper }}</span><span class="user-meta"><strong>{{ user.display_name }}</strong><small>{{ user.get_role_display }}</small></span></div>
+          <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="icon-button" type="submit" title="Sign out" aria-label="Sign out">↗</button></form>
+        </div>
+      </header>
+      <div class="content-wrap">
+        {% if messages %}<div class="message-stack" aria-live="polite">{% for message in messages %}<div class="message message-{{ message.tags }}"><span>{{ message }}</span><button type="button" data-dismiss>×</button></div>{% endfor %}</div>{% endif %}
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+  </div>
+{% else %}
+  {% if messages %}<div class="message-stack auth-messages" aria-live="polite">{% for message in messages %}<div class="message message-{{ message.tags }}"><span>{{ message }}</span><button type="button" data-dismiss>×</button></div>{% endfor %}</div>{% endif %}
+  {% block auth_content %}{% endblock %}
+{% endif %}
+<script src="{% static 'js/app.js' %}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

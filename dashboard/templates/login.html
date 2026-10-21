@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Staff sign in{% endblock %}
+{% block auth_content %}
+<div class="login-page">
+  <div class="login-aside"><div class="login-aside-inner"><div class="brand brand-light"><span class="brand-mark"><img src="{% static 'img/aroma-mark.svg' %}" alt=""></span><span><strong>Aroma Delight</strong><small>Operations desk</small></span></div><div class="login-quote"><span class="eyebrow">Good service starts behind the counter</span><h1>Make every order feel <em>considered.</em></h1><p>A calm, secure workspace for the people who keep Aroma Delight moving.</p></div><div class="login-aside-footer"><span>Limuru · Kiambu County</span><span>Est. 2026</span></div></div></div>
+  <div class="login-panel"><div class="login-panel-inner"><div class="mobile-brand brand"><span class="brand-mark"><img src="{% static 'img/aroma-mark.svg' %}" alt=""></span><span><strong>Aroma Delight</strong><small>Operations desk</small></span></div><div class="login-heading"><span class="eyebrow">Staff access</span><h2>Welcome back.</h2><p>Sign in to see today’s counter, queue and stock story.</p></div><form method="post" class="auth-form" novalidate>{% csrf_token %}<input type="hidden" name="next" value="{{ next }}">{% if form.non_field_errors %}<div class="form-alert">{{ form.non_field_errors }}</div>{% endif %}{% for field in form %}<div class="field-group"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.errors %}<div class="field-error">{{ field.errors|striptags }}</div>{% endif %}</div>{% endfor %}<button class="button button-primary button-wide" type="submit">Enter workspace <span>→</span></button></form><p class="login-footnote"><span class="security-lock">⌁</span> Protected staff workspace · Activity is audited</p></div></div>
+</div>
+{% endblock %}

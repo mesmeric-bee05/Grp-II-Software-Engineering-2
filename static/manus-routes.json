@@ -1,0 +1,1 @@
+{"routes":[{"path":"/","title":"Dashboard"},{"path":"/login/","title":"Staff login"},{"path":"/orders/","title":"Orders"},{"path":"/orders/new/","title":"New order"},{"path":"/products/","title":"Menu"},{"path":"/inventory/","title":"Inventory"},{"path":"/customers/","title":"Customers"},{"path":"/staff/","title":"Staff"}]}
