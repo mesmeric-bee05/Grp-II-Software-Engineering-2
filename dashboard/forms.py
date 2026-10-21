@@ -4,6 +4,7 @@ from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.db.models import Q
+from django.db.models.functions import Lower
 from .models import AccessRequest, Customer, InventoryItem, Order, Payment, Product, StaffUser
 
 class StyledFormMixin:
@@ -23,7 +24,8 @@ class LoginForm(AuthenticationForm):
         identifier = self.cleaned_data.get("username", "").strip()
         password = self.cleaned_data.get("password")
         if identifier and password:
-            staff = StaffUser.objects.filter(Q(username__iexact=identifier) | Q(email__iexact=identifier)).first()
+            normalized_identifier = identifier.casefold()
+            staff = StaffUser.objects.annotate(username_ci=Lower("username"), email_ci=Lower("email")).filter(Q(username_ci=normalized_identifier) | Q(email_ci=normalized_identifier)).first()
             lookup = staff.username if staff else identifier
             self.user_cache = authenticate(self.request, username=lookup, password=password)
             if self.user_cache is None:

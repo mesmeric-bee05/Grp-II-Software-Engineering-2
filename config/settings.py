@@ -13,9 +13,11 @@ def env_list(name, default=""):
     return [item.strip() for item in os.getenv(name, default).split(",") if item.strip()]
 
 DEBUG = env_bool("DEBUG", True)
-SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-local-only-change-before-deployment")
-ALLOWED_HOSTS = env_list("ALLOWED_HOSTS", "127.0.0.1,localhost")
-CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS")
+_runtime_secret_path = BASE_DIR / ".runtime-secret"
+_runtime_secret = _runtime_secret_path.read_text().strip() if _runtime_secret_path.exists() else ""
+SECRET_KEY = os.getenv("SECRET_KEY") or _runtime_secret or "django-insecure-local-only-change-before-deployment"
+ALLOWED_HOSTS = env_list("ALLOWED_HOSTS", ".a.run.app,.manus.space,.manus.computer,127.0.0.1,localhost")
+CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS", "https://*.manus.space,https://*.manus.computer")
 if not DEBUG and SECRET_KEY.startswith("django-insecure-"):
     raise RuntimeError("SECRET_KEY must be set to a strong deployment secret when DEBUG=0")
 
