@@ -62,7 +62,8 @@ def dashboard(request):
     order_count = orders.exclude(status=Order.Status.CANCELLED).count()
     average_ticket = (revenue / order_count).quantize(Decimal("0.01")) if order_count else Decimal("0.00")
     low_stock = InventoryItem.objects.select_related("product").filter(quantity_on_hand__lte=F("reorder_level"))
-    payment_mix = list(paid.values("method").annotate(total=Sum("amount")).order_by("-total"))
+    payment_mix_rows = paid.values("method").annotate(total=Sum("amount")).order_by("-total")
+    payment_mix = [{"label": Payment.Methods(row["method"]).label, "total": row["total"] or Decimal("0.00"), "percent": int(((row["total"] or Decimal("0.00")) / revenue) * 100) if revenue else 0} for row in payment_mix_rows]
     top_products = list(OrderItem.objects.filter(order__in=orders).values("product__name").annotate(units=Sum("quantity")).order_by("-units")[:5])
     trend_qs = paid.annotate(day=TruncDate("recorded_at")).values("day").annotate(total=Sum("amount")).order_by("day")
     trend = {str(row["day"]): float(row["total"] or 0) for row in trend_qs}
