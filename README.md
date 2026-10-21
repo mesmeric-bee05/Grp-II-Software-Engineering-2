@@ -18,7 +18,7 @@ For local HTTP development, keep `LOCAL_HTTP=1` in `.env`. Managed Preview and p
 
 Demo users are created only when the explicit `seed_demo` command is run. All seeded users use the development password `AromaDemo!2026`; replace or remove them before any real deployment. The application uses SQLite by default for local work and reads a MySQL-compatible `DATABASE_URL` when provided by the managed environment.
 
-There is intentionally no public sign-up flow. This is an internal coffee-shop operations system: accounts are created and managed by an administrator, and all staff sign-in attempts use Django’s server-side session and CSRF protections.
+The public landing page links to staff sign-in and a controlled **Request staff access** workflow. Requests are stored for administrator review; the application never creates an active account automatically. This is an internal coffee-shop operations system, so accounts remain administrator-managed while staff sign-in uses Django’s server-side session and CSRF protections. Sign-in accepts either a case-insensitive username or the staff member’s work email.
 
 ## Product scope
 

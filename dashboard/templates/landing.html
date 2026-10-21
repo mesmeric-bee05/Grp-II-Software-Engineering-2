@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}A calmer way to run the counter{% endblock %}
+{% block auth_content %}
+<div class="landing-page">
+  <nav class="landing-nav"><a class="brand brand-light" href="{% url 'dashboard' %}"><span class="brand-mark"><img src="{% static 'img/aroma-mark.svg' %}" alt=""></span><span><strong>Aroma Delight</strong><small>Operations desk</small></span></a><div class="landing-nav-actions"><a href="{% url 'request_access' %}">Request access</a><a class="button button-light" href="{% url 'login' %}">Staff sign in <span>→</span></a></div></nav>
+  <main class="landing-main">
+    <section class="landing-hero">
+      <div class="landing-copy"><span class="eyebrow eyebrow-light">Coffee, considered</span><h1>A better rhythm <em>behind the counter.</em></h1><p>Aroma Delight brings orders, people, stock and daily decisions into one calm, secure workspace for the team in Limuru.</p><div class="landing-ctas"><a class="button button-light" href="{% url 'login' %}">Enter the workspace <span>→</span></a><a class="landing-text-link" href="#story">See how it works <span>↓</span></a></div></div>
+      <div class="landing-orbit" aria-hidden="true"><div class="orbit-ring orbit-ring-one"></div><div class="orbit-ring orbit-ring-two"></div><div class="orbit-core"><span>AD</span><small>Since 2026</small></div><span class="orbit-tag orbit-tag-one">Orders</span><span class="orbit-tag orbit-tag-two">Stock</span><span class="orbit-tag orbit-tag-three">People</span></div>
+    </section>
+    <section class="landing-strip" id="story"><div><strong>01</strong><span>One operational view</span></div><div><strong>04</strong><span>Role-aware workspaces</span></div><div><strong>∞</strong><span>Small signals, useful decisions</span></div></section>
+    <section class="landing-story"><div><span class="eyebrow">The daily pour</span><h2>Less chasing. More care.</h2><p>From the first ticket to the final hand-off, the desk keeps the details close: what is selling, what needs attention and what the guest is waiting for.</p></div><div class="landing-cards"><article><span>01</span><h3>Serve with clarity</h3><p>Capture counter orders with an accurate, catalogue-backed total and a clear barista queue.</p></article><article><span>02</span><h3>See the signal</h3><p>Turn sales, payment mix and low-stock moments into decisions the team can act on.</p></article><article><span>03</span><h3>Keep trust close</h3><p>Protected staff access, role controls and an audit trail built for responsible operations.</p></article></div></section>
+  </main>
+  <footer class="landing-footer"><span>Limuru · Kiambu County, Kenya</span><span>Built for the people who keep Aroma Delight moving.</span></footer>
+</div>
+{% endblock %}

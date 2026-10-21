@@ -4,7 +4,7 @@ import pytest
 from django.test import override_settings
 from django.urls import reverse
 from django.utils.crypto import get_random_string
-from dashboard.models import AuditLog, InventoryItem, Order, OrderItem, Payment, Product, StaffUser
+from dashboard.models import AccessRequest, AuditLog, InventoryItem, Order, OrderItem, Payment, Product, StaffUser
 
 @pytest.mark.django_db
 @override_settings(LOCAL_HTTP=False, PREVIEW_MODE=True, CSRF_COOKIE_SECURE=True, CSRF_COOKIE_SAMESITE="None")
@@ -14,6 +14,22 @@ def test_preview_login_sets_cross_site_csrf_cookie():
     csrf_cookie = response.cookies["csrftoken"]
     assert csrf_cookie["secure"] is True
     assert csrf_cookie["samesite"] == "None"
+
+@pytest.mark.django_db
+def test_login_accepts_case_insensitive_username_and_work_email():
+    StaffUser.objects.create_user(username="manager", email="manager@aromadelight.local", password="AromaDemo!2026", role=StaffUser.Roles.MANAGER)
+    client = pytest.importorskip("django.test").Client()
+    response = client.post(reverse("login"), {"username": "MANAGER@AROMADELIGHT.LOCAL", "password": "AromaDemo!2026"})
+    assert response.status_code == 302
+    assert response["Location"] == "/"
+
+@pytest.mark.django_db
+def test_public_landing_and_access_request_flow():
+    client = pytest.importorskip("django.test").Client()
+    assert client.get(reverse("dashboard")).status_code == 200
+    response = client.post(reverse("request_access"), {"full_name": "QA Onboarding", "email": "qa-onboarding@example.com", "phone": "+254700000000", "requested_role": "CASHIER", "reason": "Counter operations"})
+    assert response.status_code == 302
+    assert AccessRequest.objects.filter(email="qa-onboarding@example.com", status=AccessRequest.Status.PENDING).exists()
 
 @pytest.mark.django_db
 class TestOrderIntegrity:

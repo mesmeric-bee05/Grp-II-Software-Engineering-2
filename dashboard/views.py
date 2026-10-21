@@ -13,9 +13,14 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_POST
-from .forms import CustomerForm, InventoryAdjustForm, LoginForm, OrderForm, ProductForm
-from .models import AuditLog, Customer, InventoryItem, Order, OrderItem, Payment, Product, StaffUser, StockTransaction
+from .forms import AccessRequestForm, CustomerForm, InventoryAdjustForm, LoginForm, OrderForm, ProductForm
+from .models import AccessRequest, AuditLog, Customer, InventoryItem, Order, OrderItem, Payment, Product, StaffUser, StockTransaction
 from .services import audit, roles_required
+
+def home(request):
+    if request.user.is_authenticated:
+        return dashboard(request)
+    return render(request, "landing.html")
 
 @require_GET
 def health(request):
@@ -24,7 +29,7 @@ def health(request):
 @require_GET
 def routes_manifest(request):
     routes = [
-        {"path": "/", "title": "Dashboard"}, {"path": "/login/", "title": "Staff login"},
+        {"path": "/", "title": "Aroma Delight"}, {"path": "/login/", "title": "Staff login"}, {"path": "/request-access/", "title": "Request staff access"},
         {"path": "/orders/", "title": "Orders"}, {"path": "/orders/new/", "title": "New order"},
         {"path": "/products/", "title": "Menu"}, {"path": "/inventory/", "title": "Inventory"},
         {"path": "/customers/", "title": "Customers"}, {"path": "/staff/", "title": "Staff"},
@@ -44,6 +49,22 @@ def login_view(request):
             next_url = reverse("dashboard")
         return redirect(next_url)
     return render(request, "login.html", {"form": form, "next": request.GET.get("next", "")})
+
+def request_access(request):
+    form = AccessRequestForm(request.POST or None)
+    submitted = request.GET.get("sent") == "1"
+    if request.method == "POST" and form.is_valid():
+        email = form.cleaned_data["email"].lower()
+        if StaffUser.objects.filter(email__iexact=email).exists():
+            form.add_error("email", "An account already exists for this email. Please use staff sign in.")
+        elif AccessRequest.objects.filter(email__iexact=email, status=AccessRequest.Status.PENDING).exists():
+            form.add_error("email", "An access request for this email is already awaiting review.")
+        else:
+            access_request = form.save(commit=False)
+            access_request.email = email
+            access_request.save()
+            return redirect(f"{reverse('request_access')}?sent=1")
+    return render(request, "request_access.html", {"form": form, "submitted": submitted})
 
 @require_POST
 def logout_view(request):
@@ -238,4 +259,4 @@ def customer_edit(request, pk):
 
 @roles_required(StaffUser.Roles.MANAGER, StaffUser.Roles.ADMIN)
 def staff_list(request):
-    return render(request, "staff.html", {"staff": StaffUser.objects.order_by("role", "last_name", "username"), "audit_events": AuditLog.objects.select_related("actor")[:10]})
+    return render(request, "staff.html", {"staff": StaffUser.objects.order_by("role", "last_name", "username"), "audit_events": AuditLog.objects.select_related("actor")[:10], "access_requests": AccessRequest.objects.filter(status=AccessRequest.Status.PENDING)[:10]})

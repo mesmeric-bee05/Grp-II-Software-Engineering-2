@@ -157,3 +157,27 @@ class AuditLog(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+
+class AccessRequest(models.Model):
+    class Roles(models.TextChoices):
+        MANAGER = "MANAGER", "Manager"
+        CASHIER = "CASHIER", "Cashier"
+        BARISTA = "BARISTA", "Barista"
+
+    class Status(models.TextChoices):
+        PENDING = "PENDING", "Pending review"
+        APPROVED = "APPROVED", "Approved"
+        DECLINED = "DECLINED", "Declined"
+
+    full_name = models.CharField(max_length=120)
+    email = models.EmailField()
+    phone = models.CharField(max_length=30, blank=True)
+    requested_role = models.CharField(max_length=20, choices=Roles.choices, default=Roles.CASHIER)
+    reason = models.CharField(max_length=240)
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
+    reviewed_by = models.ForeignKey(StaffUser, null=True, blank=True, on_delete=models.SET_NULL, related_name="access_requests_reviewed")
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ["-created_at"]
