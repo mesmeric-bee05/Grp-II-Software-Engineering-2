@@ -1,9 +1,19 @@
 from decimal import Decimal
 import json
 import pytest
+from django.test import override_settings
 from django.urls import reverse
 from django.utils.crypto import get_random_string
 from dashboard.models import AuditLog, InventoryItem, Order, OrderItem, Payment, Product, StaffUser
+
+@pytest.mark.django_db
+@override_settings(LOCAL_HTTP=False, PREVIEW_MODE=True, CSRF_COOKIE_SECURE=True, CSRF_COOKIE_SAMESITE="None")
+def test_preview_login_sets_cross_site_csrf_cookie():
+    client = pytest.importorskip("django.test").Client()
+    response = client.get(reverse("login"))
+    csrf_cookie = response.cookies["csrftoken"]
+    assert csrf_cookie["secure"] is True
+    assert csrf_cookie["samesite"] == "None"
 
 @pytest.mark.django_db
 class TestOrderIntegrity:

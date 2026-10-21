@@ -87,14 +87,18 @@ LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/login/"
 
-# The Preview host injects this exact cookie name for application sessions.
+# Managed Preview and production are HTTPS behind a proxy. Local HTTP development can
+# opt out with LOCAL_HTTP=1; defaulting to secure cross-site cookies prevents embedded
+# Preview forms from losing their CSRF/session cookies.
+LOCAL_HTTP = env_bool("LOCAL_HTTP", False)
+PREVIEW_MODE = env_bool("PREVIEW_MODE", not LOCAL_HTTP)
 SESSION_COOKIE_NAME = "webdev_app_session"
 SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SAMESITE = "None" if env_bool("PREVIEW_MODE") else "Lax"
-SESSION_COOKIE_SECURE = env_bool("PUBLIC_HTTPS") or env_bool("PREVIEW_MODE")
+SESSION_COOKIE_SAMESITE = "Lax" if LOCAL_HTTP else "None"
+SESSION_COOKIE_SECURE = not LOCAL_HTTP
 CSRF_COOKIE_HTTPONLY = False
-CSRF_COOKIE_SAMESITE = "None" if env_bool("PREVIEW_MODE") else "Lax"
-CSRF_COOKIE_SECURE = env_bool("PUBLIC_HTTPS") or env_bool("PREVIEW_MODE")
+CSRF_COOKIE_SAMESITE = "Lax" if LOCAL_HTTP else "None"
+CSRF_COOKIE_SECURE = not LOCAL_HTTP
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
 SECURE_CONTENT_TYPE_NOSNIFF = True

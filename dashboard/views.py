@@ -11,6 +11,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_POST
 from .forms import CustomerForm, InventoryAdjustForm, LoginForm, OrderForm, ProductForm
 from .models import AuditLog, Customer, InventoryItem, Order, OrderItem, Payment, Product, StaffUser, StockTransaction
@@ -30,6 +31,7 @@ def routes_manifest(request):
     ]
     return JsonResponse({"routes": routes})
 
+@ensure_csrf_cookie
 def login_view(request):
     if request.user.is_authenticated:
         return redirect("dashboard")
